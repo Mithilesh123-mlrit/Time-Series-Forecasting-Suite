@@ -1,0 +1,24 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyc
+
+# Virtual Environment
+backend/venv/
+
+# Uploaded Files
+backend/uploads/
+uploads/
+
+# Environment Variables
+.env
+
+# VS Code
+.vscode/
+
+# Python Cache
+.pytest_cache/
+
+# OS Files
+.DS_Store
+Thumbs.db
