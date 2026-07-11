@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File
+from app.services.analyze import analyze_dataset
 import os
 import shutil
 
@@ -6,9 +7,7 @@ router = APIRouter()
 
 UPLOAD_FOLDER = "uploads"
 
-# Create the uploads folder if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 
 @router.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -17,7 +16,10 @@ async def upload_file(file: UploadFile = File(...)):
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
+    analysis = analyze_dataset(file_path)
+
     return {
-        "message": "File uploaded successfully!",
-        "filename": file.filename
+        "message": "File uploaded and analyzed successfully!",
+        "filename": file.filename,
+        "analysis": analysis
     }
