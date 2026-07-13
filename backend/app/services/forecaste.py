@@ -17,3 +17,21 @@ def naive_forecast(df, target_column, forecast_steps=7):
         "forecast_steps": forecast_steps,
         "forecast": forecast
     }
+def moving_average_forecast(df, target_column, forecast_steps=7, window=5):
+    """
+    Moving Average Forecast:
+    Forecast using the average of the last 'window' observations.
+    """
+
+    recent_values = df[target_column].tail(window)
+
+    average_value = recent_values.mean()
+
+    forecast = [float(average_value)] * forecast_steps
+
+    return {
+        "model": "Moving Average",
+        "window": window,
+        "forecast_steps": forecast_steps,
+        "forecast": forecast
+    }
