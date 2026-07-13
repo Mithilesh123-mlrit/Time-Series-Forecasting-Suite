@@ -3,6 +3,7 @@ from app.services.analyze import analyze_dataset
 from app.services.preprocess import preprocess_dataset
 from app.services.validation import validate_time_series
 from app.services.feature_engineering import create_time_features
+from app.services.forecaste import naive_forecast
 import pandas as pd
 import os
 import shutil
@@ -44,6 +45,11 @@ async def upload_file(file: UploadFile = File(...)):
     df,
     analysis["date_column"]
 )
+    forecast_result = naive_forecast(
+    df,
+    analysis["target_column"],
+    forecast_steps=7
+)
 
     # Return response
     return {
@@ -61,5 +67,7 @@ async def upload_file(file: UploadFile = File(...)):
 
     "validation": validation_result,
 
-    "feature_engineering": feature_result
+    "feature_engineering": feature_result,
+
+    "forecast": forecast_result
 }
