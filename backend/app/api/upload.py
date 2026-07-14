@@ -5,7 +5,8 @@ from app.services.validation import validate_time_series
 from app.services.feature_engineering import create_time_features
 from app.services.forecaste import (
     naive_forecast,
-    moving_average_forecast
+    moving_average_forecast,
+    arima_forecast
 )
 import pandas as pd
 import os
@@ -59,6 +60,11 @@ async def upload_file(file: UploadFile = File(...)):
     forecast_steps=7,
     window=5
 )
+    arima_result = arima_forecast(
+    df,
+    analysis["target_column"],
+    forecast_steps=7
+)
 
     # Return response
     return {
@@ -80,6 +86,7 @@ async def upload_file(file: UploadFile = File(...)):
 
     "forecast": {
     "naive_forecast": forecast_result,
-    "moving_average_forecast": moving_average_result
+    "moving_average_forecast": moving_average_result,
+    "arima_forecast": arima_result
 }
 }
