@@ -3,11 +3,14 @@ from app.services.analyze import analyze_dataset
 from app.services.preprocess import preprocess_dataset
 from app.services.validation import validate_time_series
 from app.services.feature_engineering import create_time_features
+from app.services.train_test import train_test_split_time_series
+from app.services.evaluation import evaluate_forecast
 from app.services.forecaste import (
     naive_forecast,
     moving_average_forecast,
     arima_forecast
 )
+
 import pandas as pd
 import os
 import shutil
@@ -45,48 +48,71 @@ async def upload_file(file: UploadFile = File(...)):
         analysis["target_column"]
     )
 
+    # Feature Engineering
     feature_result = create_time_features(
-    df,
-    analysis["date_column"]
-)
+        df,
+        analysis["date_column"]
+    )
+
+    # Train-Test Split
+    split_result = train_test_split_time_series(
+        df,
+        analysis["target_column"],
+        test_size=0.2
+    )
+    print("TRAIN TEST SPLIT:", split_result)
+
+    train_df = split_result["train"]
+    test_df = split_result["test"]
+
+    # Forecasting Models
     forecast_result = naive_forecast(
-    df,
-    analysis["target_column"],
-    forecast_steps=7
-)
+        df,
+        analysis["target_column"],
+        forecast_steps=7
+    )
+
     moving_average_result = moving_average_forecast(
-    df,
-    analysis["target_column"],
-    forecast_steps=7,
-    window=5
-)
+        df,
+        analysis["target_column"],
+        forecast_steps=7,
+        window=5
+    )
+
     arima_result = arima_forecast(
-    df,
-    analysis["target_column"],
-    forecast_steps=7
-)
+        df,
+        analysis["target_column"],
+        forecast_steps=7
+    )
 
-    # Return response
+    print("ARIMA RESULT:", arima_result)
+
+    # Return Response
     return {
-    "message": "File uploaded, analyzed, preprocessed, validated and feature engineered successfully!",
-    "filename": file.filename,
+        "message": "File uploaded, analyzed, preprocessed, validated, feature engineered and forecasted successfully!",
+        "filename": file.filename,
 
-    "analysis": analysis,
+        "analysis": analysis,
 
-    "preprocessing": {
-        "duplicates_removed": preprocess_result["duplicates_removed"],
-        "quality_score": preprocess_result["quality_score"],
-        "outliers": preprocess_result["outliers"],
-        "recommendations": preprocess_result["recommendations"]
-    },
+        "preprocessing": {
+            "duplicates_removed": preprocess_result["duplicates_removed"],
+            "quality_score": preprocess_result["quality_score"],
+            "outliers": preprocess_result["outliers"],
+            "recommendations": preprocess_result["recommendations"]
+        },
 
-    "validation": validation_result,
+        "validation": validation_result,
 
-    "feature_engineering": feature_result,
+        "feature_engineering": feature_result,
 
-    "forecast": {
-    "naive_forecast": forecast_result,
-    "moving_average_forecast": moving_average_result,
-    "arima_forecast": arima_result
-}
-}
+        "train_test_split": {
+            "train_size": split_result["train_size"],
+            "test_size": split_result["test_size"]
+        },
+
+        "forecast": {
+            "naive_forecast": forecast_result,
+            "moving_average_forecast": moving_average_result,
+            "arima_forecast": arima_result
+        }
+    }
